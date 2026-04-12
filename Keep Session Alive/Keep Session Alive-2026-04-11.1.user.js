@@ -6,12 +6,13 @@
 // @author       Jeremy Gagliardi
 // @license      GPL-3.0
 // @homepageURL  https://github.com/jjg8/Tampermonkey-Scripts/tree/main/Keep%20Session%20Alive
-// @match        https://vhi.dca1.inf.databridgesites.com:*/*
-// @match        https://observium.databridgesites.com/*
-// @match        https://app.getsling.com/*
-// @match        https://databridgesites.atlassian.net/jira/dashboards/*
+// @match        https://www.example.com/*
 // @grant        none
 // ==/UserScript==
+//
+// Update the @match line for the URL you need this to work on.
+// Add multiple @match lines for multiple URLs.
+//
 
 (function () {
     'use strict';
