@@ -1,4 +1,4 @@
-// ==/UserScript==
+// ==UserScript==
 // @name         Post-login Redirect
 // @namespace    http://tampermonkey.net/
 // @version      2026-04-14.2
@@ -37,13 +37,13 @@
     };
     // Match the path portion of the @match URL; DON'T include protocol://domain or any portion after & including ?, but it must include the initial /.
     // E.g. '/login'
-    const LoginPath     = '/login';
+    const LoginPath = '/login';
 
 
 
-    const StorageKey    = 'page_logged_in';
-    const SlotCountKey  = 'page_slot_count';
-    const SlotTimeKey   = 'page_slot_time';
+    const StorageKey = 'page_logged_in';
+    const SlotCountKey = 'page_slot_count';
+    const SlotTimeKey = 'page_slot_time';
     const SlotTimeoutMs = 2 * 60 * 1000; // Reset slot counter if >2 minutes since last window loaded.
 
     // Clear any stale login flag from a previous session...
