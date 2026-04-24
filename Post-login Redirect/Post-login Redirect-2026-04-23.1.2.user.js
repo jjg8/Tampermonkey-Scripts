@@ -91,8 +91,10 @@
     window.addEventListener('storage', (e) => {
         if (e.key === StorageKey) {
             Observer.disconnect();
-            // Redirect this window to its assigned TargetURL...
-            window.location.href = myTargetURL;
+            // After a 2s delay, redirect this window to its assigned TargetURL...
+            setTimeout(function() {
+                window.location.href = myTargetURL;
+            }, SlotTimeoutMs);
         }
     });
 
