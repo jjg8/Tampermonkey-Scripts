@@ -12,5 +12,7 @@ Hello and welcome to my Tampermonkey Scripts repository.
   - After detecting successful login in any browser window, redirects each window to its own URL, supporting 1 or more TargetURLs
 - **Sling Weekly Reload**
   - Strips the &date=YYYY-MM-DD parameter from the URL if it's before today & reloads the URL
+- **Superimpose**
+  - Superimpose another web page at fixed coordinates & size with custom background color/transparency
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
