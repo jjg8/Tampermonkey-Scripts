@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Superimpose
 // @namespace    http://tampermonkey.net/
-// @version      2026-04-25.1_DBS-2026-04-25.1
+// @version      2026-04-25.1
 // @description  Superimpose another web page at fixed coordinates & size with custom background color/transparency
 // @author       Jeremy Gagliardi
 // @license      GPL-3.0
