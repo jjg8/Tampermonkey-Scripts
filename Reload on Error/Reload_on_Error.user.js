@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Reload on Error
 // @namespace    http://tampermonkey.net/
-// @version      2026-05-08.2
+// @version      2026-05-08.2.1
 // @description  Reloads to a specific page if the URL changes or a server error is detected after a delay
 // @author       Jeremy Gagliardi
 // @license      GPL-3.0
@@ -12,7 +12,7 @@
 // @match        https://service2.example.com/* //*****BEFORE****//
 // @exclude      https://login.*                //*****FIRST*****//
 // @exclude      https://login.*/*              //******USE******//
-// @exclude      https://*/login*               //!!!!!!!!!!!!!!!//
+// @exclude      https://*/*login*              //!!!!!!!!!!!!!!!//
 // @grant        none
 // ==/UserScript==
 //
@@ -54,8 +54,7 @@
 //        • matchingType — Set to 1 if the current page must start with the expected page, 2 for ends with, and anything else (e.g. 0) to match exactly.
 //          • For instance, an expected page may not remain static over time; one service I know always appends &date=YYYY-MM-DD and if so, set to 1.
 //        • reloadToPage — The full URL to reload to if the expected page is no longer showing or an error message is displayed.
-//          • This can be the same as the expected page or different as needed; if the same, you can do...
-//              const reloadToPage = expectedPage;
+//          • This can be the same as the expected page or different as needed.
 //        • reloadWaitMs — Before reloading, always wait this many milliseconds before attempting reload.
 //          • This should be a realistic timeout period to prevent reloads hammering the server too often.
 //          • Also, make extra sure your @exclude lines above exclude any login or other page that requires manual intervention, so they're not reloaded.
@@ -303,7 +302,7 @@
 
     // Else if NOT in an error state, reset the counter...
     } else {
-        const storageKey = `reloadCount_${btoa(expectedPage)}`;
+        const storageKey = 'reloadCount_' + expectedPage.replace(/[^A-Za-z0-9]/gi, '_');
         if (sessionStorage.getItem(storageKey)) {
             sessionStorage.removeItem(storageKey);
         }
