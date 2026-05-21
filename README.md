@@ -10,6 +10,8 @@ Hello and welcome to my Tampermonkey Scripts repository.
   - Prevents inactivity session timeouts by simulating periodic activity — great for kiosk mode or over-aggressive timeouts
 - **Post-login Redirect**
   - After detecting successful login in any browser window, redirects each window to its own URL, supporting 1 or more TargetURLs
+- **Scroll to End**
+  - Scrolls to the bottom of the page once fully loaded
 - **Sling Weekly Reload**
   - Strips the &date=YYYY-MM-DD parameter from the URL if it's before today & reloads the URL
 - **Superimpose**
