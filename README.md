@@ -16,5 +16,7 @@ Hello and welcome to my Tampermonkey Scripts repository.
   - Strips the &date=YYYY-MM-DD parameter from the URL if it's before today & reloads the URL
 - **Superimpose**
   - Superimpose another web page at fixed coordinates & size with custom background color/transparency
+- **Zabbix Midnight+1m Auto-reload**
+  - Zabbix does garbage-collection at midnight, which hoses all current sessions; this reloads a dashboard automatically
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
