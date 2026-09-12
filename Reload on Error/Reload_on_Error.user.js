@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Reload on Error
 // @namespace    http://tampermonkey.net/
-// @version      2026-05-08.2.1
+// @version      2026-09-12.3
 // @description  Reloads to a specific page if the URL changes or a server error is detected after a delay
 // @author       Jeremy Gagliardi
 // @license      GPL-3.0
 // @homepageURL  https://github.com/jjg8/Tampermonkey-Scripts/tree/main/Reload%20on%20Error
+// @noframes     false
 // @match        https://service1.example.com   //*CONFIGURATION*//
 // @match        https://service1.example.com/* //****REQUIRED***//
 // @match        https://service2.example.com   //******HERE*****//
@@ -28,6 +29,7 @@
 // * CONFIGURATION REQUIRED BEFORE USE *
 // *************************************
 //  • To match your environment, update above the @match & @exclude lines and below the CONFIGURATION VARIABLES...
+//    • Added support for iframes — Your @match & @exclude lines must also extend to domains loaded in each iframe for this script to apply.
 //    • The @match lines above should be the base domain or root page, so it matches any page, including errors, that it might load...
 //      • You may need multiple @match lines if they're different enough, for example...
 //          @match https://app.example.com
@@ -46,7 +48,7 @@
 //          @exclude https://example.com/login.php?*
 //    • CONFIGURATION VARIABLES below...
 //      • There are 4 arrays to complete.
-//      • For SERVICE_CONFIGS and SERVICE_CONFIGS, the elements are...
+//      • For SERVICE_CONFIGS and DEFAULT_CONFIG, the elements are...
 //        • enableConfig — Set this to true to monitor this item or false to ignore it.
 //          • If this is not a strict true or false value, it defaults to false.
 //        • expectedPage — The full URL you expect to remain loaded in the browser tab, for example...
@@ -257,12 +259,34 @@
             if (currentPage !== expectedLower) return true;
         }
 
-        // 2. Check for common Web Server error titles...
+        // 2. Check for common Web Server errors in the page title or body...
+        //// Check page title...
         if (errorTitleMessages.some(title => document.title.toLowerCase().includes(title))) return true;
-
-        // 3. Check for specific error text in the body...
+        //// Check page body...
         const pageText = document.body ? document.body.innerText : "";
         if (errorBodyMessages.some(msg => pageText.toLowerCase().includes(msg))) return true;
+
+        // 3. If applicable, also inspect child iframes if running in the top window context...
+        if (window === window.top) {
+            const frames = document.getElementsByTagName('iframe');
+            for (let i = 0; i < frames.length; i++) {
+                try {
+                    const iframeDoc = frames[i].contentDocument || frames[i].contentWindow.document;
+                    if (!iframeDoc) continue;
+
+                    // Check iframe title...
+                    const iframeTitle = iframeDoc.title ? iframeDoc.title.toLowerCase() : "";
+                    if (errorTitleMessages.some(title => iframeTitle.includes(title))) return true;
+
+                    // Check iframe body text...
+                    const iframeText = iframeDoc.body ? iframeDoc.body.innerText.toLowerCase() : "";
+                    if (errorBodyMessages.some(msg => iframeText.includes(msg))) return true;
+
+                } catch (e) {
+                    // Ignore DOMException for cross-origin iframes
+                }
+            }
+        }
 
         return false;
     }
@@ -291,7 +315,7 @@
 
         // Do the reload after the wait time...
         setTimeout(() => {
-            window.location.replace(reloadToPage);
+            window.top.location.replace(reloadToPage);
         }, reloadWaitMs);
     }
 
