@@ -66,9 +66,9 @@
 //          • If you set this to a very low value (e.g. <=60000 or 1 minute), I HIGHLY recommend you set a reloadExtent >0 and make sure it's a low value.
 //        • reloadExtent — Set to >0 to limit the number of reloads before giving up and anything else (e.g. 0) for unlimited.
 //          • You may need this to avoid reload loops leading to IP banishment, lockouts, overloading, exceeding network limits, & other undesired behavior.
-//      • errorBodyMessages — A case-insensitive array of keywords/phrases in the page BODY indicating an error.
+//      • error_BodyMessages — A case-insensitive array of keywords/phrases in the page BODY indicating an error.
 //      • errorTitleMessages — A case-insensitive array of keywords/phrases in the page TITLE indicating an error.
-//      • For errorBodyMessages & errorTitleMessages, not all bases are covered here, so you'll need to customize them to the actual error messages.
+//      • For error_BodyMessages & errorTitleMessages, not all bases are covered here, so you'll need to customize them to the actual error messages.
 //
 
 (function() {
@@ -133,7 +133,7 @@
     //  • The following examples are not an exhaustive list and should be customized for your environment.
     //  • Many services use custom error messages in the page BODY, such as "DB Error", so you'll need to discover those.
     /////
-    const errorBodyMessages = [
+    const error_BodyMessages = [
         "DB not connected",
         "database connection configuration",
         "DB Error",
@@ -183,7 +183,7 @@
     ////////////////////////////////////
 
 
-    // Validation: Ensures configuration values are sensible and not nonsense...
+    // Validation:  Ensures configuration values are sensible and not nonsense...
     function validateConfig(cfg) {
         // Guard against an entirely missing or null configuration object...
         if (!cfg || typeof cfg !== 'object') return null;
@@ -218,7 +218,7 @@
     }
 
 
-    // Selection: Find the first config key that is contained within the current URL...
+    // Selection:  Find the first config key that is contained within the current URL...
     const currentPage = window.location.href.toLowerCase();
     let selectedConfig = DEFAULT_CONFIG;
     for (const key in SERVICE_CONFIGS) {
@@ -259,47 +259,74 @@
             if (currentPage !== expectedLower) return true;
         }
 
-        // 2. Check for common Web Server errors in the page title or body...
-        //// Check page title...
-        if (errorTitleMessages.some(title => document.title.toLowerCase().includes(title))) return true;
-        //// Check page body...
-        const pageText = document.body ? document.body.innerText : "";
-        if (errorBodyMessages.some(msg => pageText.toLowerCase().includes(msg))) return true;
+        /////
+        // 2. Check for common Web Server errors in the parent page's title & body...
+        /////
+        // Get the parent page's title string & body contents...
+        const pageTitle = (document.title || "").toLowerCase();
+        const page_Body = document.body ? document.body.innerText.toLowerCase() : "";
+        // And check both for errors...
+        if (
+            errorTitleMessages.some(msg => pageTitle.includes(msg)) ||
+            error_BodyMessages.some(msg => page_Body.includes(msg))
+        ) {
+            console.log(`[${scriptName}] Found error string in parent page.`);
+            return true;
+        }
 
-        // 3. If applicable, also inspect child iframes if running in the top window context...
+        /////
+        // 3. If running in the top window context & if applicable, also inspect each child iframe...
+        /////
         if (window === window.top) {
-            const frames = document.getElementsByTagName('iframe');
-            for (let i = 0; i < frames.length; i++) {
+            const iframes = document.getElementsByTagName('iframe');
+            for (let i = 0; i < iframes.length; i++) {
+                // For iframes, a try/catch block is needed in case of cross-origin access errors...
                 try {
-                    const iframeDoc = frames[i].contentDocument || frames[i].contentWindow.document;
+                    // Get iframe #i's contents, and if none, skip it...
+                    const iframeDoc = iframes[i].contentDocument || iframes[i].contentWindow.document;
                     if (!iframeDoc) continue;
 
-                    // Check iframe title...
-                    const iframeTitle = iframeDoc.title ? iframeDoc.title.toLowerCase() : "";
-                    if (errorTitleMessages.some(title => iframeTitle.includes(title))) return true;
-
-                    // Check iframe body text...
-                    const iframeText = iframeDoc.body ? iframeDoc.body.innerText.toLowerCase() : "";
-                    if (errorBodyMessages.some(msg => iframeText.includes(msg))) return true;
-
+                    // Get the iframe's embedded title string & body contents...
+                    const iframeTitle = (iframeDoc.title || "").toLowerCase();
+                    const iframe_Body = iframeDoc.body ? iframeDoc.body.innerText.toLowerCase() : "";
+                    // And check both for errors...
+                    if (
+                        errorTitleMessages.some(msg => iframeTitle.includes(msg)) ||
+                        error_BodyMessages.some(msg => iframe_Body.includes(msg))
+                    ) {
+                        console.log(`[${scriptName}] Found error string in iframe #${i}.`);
+                        return true;
+                    }
                 } catch (e) {
-                    // Ignore DOMException for cross-origin iframes
+                    // Ignore cross-origin access errors from embedded iframes...
+                    continue;
                 }
             }
         }
 
+        // If no condition above calls `return true` (isAnError=true), then everything is presumed to be OK (isAnError=false)...
         return false;
     }
 
 
+    // Safely get the top window's storage or fallback to the iframe's storage...
+    function getStorage() {
+        try {
+            return window.top.sessionStorage;
+        } catch (e) {
+            return window.sessionStorage;
+        }
+    }
+
     // Do the reload attempt...
     function triggerReload() {
+        const storageObj = getStorage();
         // If reloadExtent is >0, limit the number of reload attempts...
         let attempts = `unlimited attempts`;
         if (reloadExtent > 0) {
             // Get the current reload count...
             const storageKey = 'reloadCount_' + expectedPage.replace(/[^A-Za-z0-9]/gi, '_'); // Unique key per expected page
-            let currentCount = parseInt(sessionStorage.getItem(storageKey)) || 0;
+            let currentCount = parseInt(storageObj.getItem(storageKey)) || 0;
             // If the current reload count exceeds the limit, stop here...
             if (currentCount >= reloadExtent) {
                 console.error(`[${scriptName}] Maximum reload attempts (${reloadExtent}) reached. Stopping.`);
@@ -307,7 +334,7 @@
             }
             // Otherwise, increment the current count and proceed...
             currentCount++;
-            sessionStorage.setItem(storageKey, currentCount);
+            storageObj.setItem(storageKey, currentCount);
             attempts = `attempt ${currentCount} of ${reloadExtent}`;
         }
 
@@ -319,18 +346,28 @@
         }, reloadWaitMs);
     }
 
+    // Main execution...
+    function runScript() {
+        // If currentPage doesn't match expectedPage OR an error page loads in its place...
+        if (isAnError()) {
+            triggerReload();
 
-    // If currentPage doesn't match expectedPage OR an error page loads in its place...
-    if (isAnError()) {
-        triggerReload();
-
-    // Else if NOT in an error state, reset the counter...
-    } else {
-        const storageKey = 'reloadCount_' + expectedPage.replace(/[^A-Za-z0-9]/gi, '_');
-        if (sessionStorage.getItem(storageKey)) {
-            sessionStorage.removeItem(storageKey);
+        // Else if NOT in an error state, reset the counter...
+        } else {
+            const storageObj = getStorage();
+            const storageKey = 'reloadCount_' + expectedPage.replace(/[^A-Za-z0-9]/gi, '_');
+            if (storageObj.getItem(storageKey)) {
+                storageObj.removeItem(storageKey);
+            }
+            console.log(`[${scriptName}] Reset the reload counter.`);
         }
-        console.log(`[${scriptName}] Reset the reload counter.`);
+    }
+
+    // Delay execution until fully loaded...
+    if (document.readyState === 'complete') {
+        runScript();
+    } else {
+        window.addEventListener('load', runScript);
     }
 
 })();
