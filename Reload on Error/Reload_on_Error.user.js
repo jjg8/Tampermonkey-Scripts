@@ -203,7 +203,7 @@
             : 10 * 60 * 1000; // Default to 10 minutes.
 
         const checkReloadExtent = (typeof cfg.reloadExtent === 'number' && cfg.reloadExtent >= 0)
-            ? cfg.reloadExtent 
+            ? cfg.reloadExtent
             : 0; // Default to unlimited.
 
         // If it gets this far, return a clean, sanitized object...
@@ -330,7 +330,7 @@
             // If the current reload count exceeds the limit, stop here...
             if (currentCount >= reloadExtent) {
                 console.error(`[${scriptName}] Maximum reload attempts (${reloadExtent}) reached. Stopping.`);
-                return; 
+                return;
             }
             // Otherwise, increment the current count and proceed...
             currentCount++;
