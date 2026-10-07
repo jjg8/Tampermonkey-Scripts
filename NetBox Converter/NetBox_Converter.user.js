@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NetBox Converter
 // @namespace    http://tampermonkey.net/
-// @version      2026-10-06.1.0.0
+// @version      2026-10-07.1.1.0
 // @description  Convert all units in MB, GB, TB, and PB to equivalent MiB, GiB, TiB, and PiB, respectively
 // @author       Jeremy Gagliardi
 // @license      GPL-3.0
@@ -10,9 +10,26 @@
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
+//
+// 2026-10-07.1.1.0
+//  • Replaced parentheses & manual styling with the .binary-unit class to shape the background like a 'pill'.
+//
 
 (function() {
     'use strict';
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .binary-unit {
+            border-radius:     8px;
+            padding:           0.1em 0.25em;
+            background-color:  Yellow;
+            color:             Black;
+            font-weight:       Bold;
+            font-size:         10pt;
+        }
+    `;
+    document.head.appendChild(style);
 
     const UNIT_FACTORS = {
         'B':   1,
@@ -58,7 +75,7 @@
                 let originalUnit = match[2].toUpperCase();
                 let binaryString = convertDecimalToBinary(numericValue, originalUnit);
 
-                cell.innerHTML = `${text}<span style="font-size:10pt;"> <span style="background-color:yellow; color:black;">${binaryString}</span></span>`;
+                cell.innerHTML = `${text} <span class="binary-unit">${binaryString}</span>`;
                 cell.dataset.converted = 'true';
             }
         });
