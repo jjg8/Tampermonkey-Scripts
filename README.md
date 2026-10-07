@@ -18,6 +18,8 @@ Hello and welcome to my Tampermonkey Scripts repository.
   - Strips the &date=YYYY-MM-DD parameter from the URL if it's before today & reloads the URL
 - **Superimpose**
   - Superimpose another web page at fixed coordinates & size with custom background color/transparency
+- **Virtuozzo Converter**
+  - Convert all binary units (KiB, MiB, GiB, TiB, PiB) to decimal units (KB, MB, GB, TB, PB) in Virtuozzo
 - **Zabbix Midnight+1m Auto-reload**
   - Zabbix does garbage-collection at midnight, which hoses all current sessions; this reloads a dashboard automatically
 
