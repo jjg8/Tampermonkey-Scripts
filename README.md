@@ -8,6 +8,8 @@ Hello and welcome to my Tampermonkey Scripts repository.
   - From fields displaying only date (e.g. 08/13/25), get date/time from its tooltip title (e.g. Aug 13, 2025 1:23 PM) and output in ydhm format (e.g. 1d 6h 19m) — see code for more
 - **Keep Session Alive**
   - Prevents inactivity session timeouts by simulating periodic activity — great for kiosk mode or over-aggressive timeouts
+- **NetBox Converter**
+  - Convert all units in MB, GB, TB, and PB to equivalent MiB, GiB, TiB, and PiB, respectively
 - **Post-login Redirect**
   - After detecting successful login in any browser window, redirects each window to its own URL, supporting 1 or more TargetURLs
 - **Scroll to End**
